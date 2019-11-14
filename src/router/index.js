@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 const DashboardLayout = () => import( /* webpackChunkName: "dashboard" */ '../components/dashboardLayout.vue')
+const LoginLayout = () => import( /* webpackChunkName: "dashboard" */ '../components/landingPage.vue')
 
 function loadView(view) {
     return () => import(
@@ -8,14 +9,25 @@ function loadView(view) {
         `../components/dashboardContents/${view}.vue`)
 }
 const routes = [{
-    path: '/',
+    path: '/dashboard',
     component: DashboardLayout,
     children: [{
         name: 'UserController',
-        path: '',
+        path: '/',
         component: loadView('userController')
+    },
+    {
+        name: 'ServicesController',
+        path: 'services',
+        component: loadView('servicesController')
     }]
-}, ]
+}, 
+{
+    path: '/',
+    name: 'LandingPage',
+    component: LoginLayout
+}
+]
 Vue.use(Router)
 const router = new Router({
     mode: 'history',

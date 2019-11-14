@@ -14,7 +14,7 @@
 
             <v-divider></v-divider>
             <v-list>
-                <v-list-item v-for="item in items" :key="item.title" link>
+                <v-list-item v-for="item in items" :key="item.title" link :to="item.router">
                     <v-list-item-icon>
                         <v-icon>{{ item.icon }}</v-icon>
                     </v-list-item-icon>
@@ -27,7 +27,7 @@
 
             <template v-slot:append>
                 <div class="pa-2">
-                    <v-btn block>Logout</v-btn>
+                    <v-btn block link to = '/'>Logout</v-btn>
                 </div>
             </template>
         </v-navigation-drawer>
@@ -55,8 +55,14 @@
             return {
                 drawer: null,
                 items: [{
-                    title: 'User Controller',
+                    title: 'User Controller' , 
+                    router: "/dashboard",
                     icon: 'mdi-human-male'
+                },
+                {
+                    title: 'Services Controller',
+                    router: "/dashboard/services", 
+                    icon: 'mdi-car'
                 }, ],
             }
         },

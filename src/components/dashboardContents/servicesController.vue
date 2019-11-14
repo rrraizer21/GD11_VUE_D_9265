@@ -8,7 +8,7 @@
                         <v-btn depressed dark rounded style="text-transform: none !important;" color="green accent-3"
                             @click="dialog = true">
                             <v-icon size="18" class="mr-2">mdi-pencil-plus</v-icon>
-                            Tambah User
+                            Tambah Services
                         </v-btn>
                     </v-flex>
                     <v-flex xs6 class="text-right">
@@ -17,14 +17,15 @@
                     </v-flex>
                 </v-layout>
 
-                <v-data-table :headers="headers" :items="users" :search="keyword" :loading="load">
+                <v-data-table :headers="headers" :items="services" :search="keyword" :loading="load">
                     <template v-slot:body="{ items }">
                         <tbody>
                             <tr v-for="(item,index) in items" :key="item.id">
                                 <td>{{ index + 1 }}</td>
                                 <td>{{ item.name }}</td>
-                                <td>{{ item.email}}</td>
-                                <td>{{ item.password }}</td>
+                                <td>{{ item.price}}</td>
+                                <td>{{ item.type }}</td>
+                                <td>{{ item.created_at }}</td>
                                 <td class="text-center">
                                     <v-btn icon color="indigo" light @click="editHandler(item)">
                                         <v-icon>mdi-pencil</v-icon>
@@ -42,7 +43,7 @@
         <v-dialog v-model="dialog" persistent max-width="600px">
             <v-card>
                 <v-card-title>
-                    <span class="headline">User Profile</span>
+                    <span class="headline">Services Profile</span>
                 </v-card-title>
                 <v-card-text>
                     <v-container>
@@ -51,11 +52,10 @@
                                 <v-text-field label="Name*" v-model="form.name" required></v-text-field>
                             </v-col>
                             <v-col cols="12">
-                                <v-text-field label="Email*" v-model="form.email" required></v-text-field>
+                                <v-text-field label="Price*" v-model="form.price" required></v-text-field>
                             </v-col>
                             <v-col cols="12">
-                                <v-text-field label="Password*" v-model="form.password" type="password" required>
-                                </v-text-field>
+                                <v-select v-model="form.type" :items="items" label="Type"></v-select>
                             </v-col>
                         </v-row>
                     </v-container>
@@ -83,6 +83,7 @@
             return {
                 dialog: false,
                 keyword: '',
+                items:["Ringan", "Sedang", "Berat"],
                 headers: [{
                         text: 'No',
                         value: 'no',
@@ -92,29 +93,33 @@
                         value: 'name'
                     },
                     {
-                        text: 'Email',
-                        value: 'email'
+                        text: 'Price',
+                        value: 'price'
                     },
                     {
-                        text: 'Password',
-                        value: 'password'
+                        text: 'Type',
+                        value: 'type'
+                    },
+                    {
+                        text: 'Created At',
+                        value: 'created_at'
                     },
                     {
                         text: 'Aksi',
                         value: null
                     },
                 ],
-                users: [],
+                services: [],
                 snackbar: false,
                 color: null,
                 text: '',
                 load: false,
                 form: {
                     name: '',
-                    email: '',
-                    password: ''
+                    price: '',
+                    type: '',
                 },
-                user: new FormData,
+                service: new FormData,
                 typeInput: 'new',
                 errors: '',
                 updatedId: '',
@@ -122,18 +127,18 @@
         },
         methods: {
             getData() {
-                var uri = this.$apiUrl + '/user'
+                var uri = this.$apiUrl + '/services'
                 this.$http.get(uri).then(response => {
-                    this.users = response.data.message
+                    this.services = response.data.message
                 })
             },
             sendData() {
-                this.user.append('name', this.form.name);
-                this.user.append('email', this.form.email);
-                this.user.append('password', this.form.password);
-                var uri = this.$apiUrl + '/user'
+                this.service.append('name', this.form.name);
+                this.service.append('price', this.form.price);
+                this.service.append('type', this.form.type);
+                var uri = this.$apiUrl + '/services'
                 this.load = true
-                this.$http.post(uri, this.user).then(response => {
+                this.$http.post(uri, this.service).then(response => {
                     this.snackbar = true; //mengaktifkan snackbar
                     this.color = 'green'; //memberi warna snackbar
                     this.text = response.data.message; //memasukkan pesan ke snackbar
@@ -150,12 +155,12 @@
                 })
             },
             updateData() {
-                this.user.append('name', this.form.name);
-                this.user.append('email', this.form.email);
-                this.user.append('password', this.form.password);
-                var uri = this.$apiUrl + '/user/' + this.updatedId;
+                this.service.append('name', this.form.name);
+                this.service.append('price', this.form.price);
+                this.service.append('type', this.form.type);
+                var uri = this.$apiUrl + '/services/' + this.updatedId;
                 this.load = true
-                this.$http.post(uri, this.user).then(response => {
+                this.$http.post(uri, this.service).then(response => {
                     this.snackbar = true; //mengaktifkan snackbar
                     this.color = 'green'; //memberi warna snackbar
                     this.text = response.data.message; //memasukkan pesan ke snackbar
@@ -177,13 +182,13 @@
                 this.typeInput = 'edit';
                 this.dialog = true;
                 this.form.name = item.name;
-                this.form.email = item.email;
-                this.form.password = '',
+                this.form.price = item.price;
+                this.form.type = item.type;
                     this.updatedId = item.id
             },
             deleteData(deleteId) { //mengahapus data
                 var uri = this.$apiUrl +
-                    '/user/' + deleteId; //data dihapus berdasarkan id
+                    '/services/' + deleteId; //data dihapus berdasarkan id
                 this.$http.delete(uri).then(response => {
                     this.snackbar = true;
                     this.text = response.data.message;
@@ -208,8 +213,8 @@
             resetForm() {
                 this.form = {
                     name: '',
-                    email: '',
-                    password: ''
+                    price: '',
+                    type: '',
                 }
             }
         },
